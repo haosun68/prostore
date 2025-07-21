@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { signInDefaultValues, signUpDefaultValues } from '@/lib/constants';
+import { signInDefaultValues } from '@/lib/constants';
 import { signInWithCredentials } from '@/lib/actions/user.actions';
 import { useActionState } from 'react';
 import { useFormStatus } from 'react-dom';
@@ -34,14 +34,14 @@ const CredentialsSignInForm = () => {
       <input type='hidden' name='callbackUrl' value={callbackUrl} />
       <div className='space-y-6'>
         <div>
-          <Label htmlFor='name'>Name</Label>
+          <Label htmlFor='email'>Email</Label>
           <Input
-            id='name'
-            name='name'
-            type='text'
+            id='email'
+            name='email'
+            type='email'
             required
-            autoComplete='name'
-            defaultValue={signUpDefaultValues.name}
+            autoComplete='email'
+            defaultValue={signInDefaultValues.email}
           />
         </div>
         <div>

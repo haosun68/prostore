@@ -4,7 +4,8 @@ import { signInFormSchema, signUpFormSchema } from "../validators";
 import { signIn, signOut } from "@/auth";
 import { hashSync } from "bcrypt-ts-edge";
 import { prisma } from "@/db/prisma";
-// import { isRedirectError } from "next/dist/client/components/redirect"; // Next.js 15 没有 isRedirectError，如需判断重定向错误可用 getRedirectError
+import { formatError } from "@/lib/utils";
+
 
 // Sign in the user with credentials
 export async function signInWithCredentials(prevState: unknown, formData: FormData) {
@@ -15,11 +16,11 @@ export async function signInWithCredentials(prevState: unknown, formData: FormDa
     });
     await signIn('credentials', user);
     return { success: true, message: 'Signed in successfully' };
-  } catch {
-    // if (isRedirectError(error)) {
-    //   throw error;
-    // }
-    return { success: false, message: 'Invalid email or password' };
+  } catch (error) {
+    if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
+      throw error;
+    }
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -57,8 +58,8 @@ export async function signUpUser(prevState: unknown, formData: FormData) {
     return { success: true, message: 'user register successfully' };
   } catch (error) {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
-      return { success: true, message: 'user register successfully' };
+      throw error;
     }
-    return { success: false, message: 'Failed to register user' };
+    return { success: false, message: await formatError(error) };
   }
 } 
