@@ -5,6 +5,7 @@ import CredentialsProvider from 'next-auth/providers/credentials';
 import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
 
+
 export const config: NextAuthConfig = {
   pages: {
     signIn: '/sign-in',
@@ -69,10 +70,11 @@ export const config: NextAuthConfig = {
         }
       }
       // Update database to reflect the token name
-      await prisma.user.update({
-        where: { id: token.sub },
-        data: { name: token.name }
-      });
+      // Temporarily commented out due to DB connection issues
+      // await prisma.user.update({
+      //   where: { id: token.sub },
+      //   data: { name: token.name }
+      // });
       return token;
     },
   },
