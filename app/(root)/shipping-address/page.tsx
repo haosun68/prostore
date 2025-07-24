@@ -20,7 +20,9 @@ const ShippingAddressPage = async () => {
 
   const userId = session?.user?.id;
 
-  if (!userId) throw new Error('No user ID');
+  if (!userId) {
+    redirect('/sign-in?callbackUrl=/cart');
+  }
 
   const user = await getUserById(userId);
 

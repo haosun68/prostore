@@ -4,6 +4,8 @@ import { prisma } from '@/db/prisma';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { compareSync } from 'bcrypt-ts-edge';
 import type { NextAuthConfig } from 'next-auth';
+import { cookies } from 'next/headers';
+import { revalidatePath } from 'next/cache';
 
 
 export const config: NextAuthConfig = {
@@ -53,28 +55,77 @@ export const config: NextAuthConfig = {
       session.user.name = token.name;
       session.user.role = token.role;
 
-      console.log(token);
-
-      if (trigger === 'update') {
+      if (trigger === 'update' && user?.name) {
         session.user.name = user.name;
       }
       return session;
     },
-    async jwt({ token, user }: any) {
+    async jwt({ token, user, trigger, session }: any) {
       // Assign user fields to token
       if (user) {
+        token.id = user.id;
         token.role = user.role;
         // If user has no name then use the email
         if (user.name === 'NO_NAME') {
           token.name = user.email!.split('@')[0];
+          
+          // Update database to reflect the token name only when needed
+          try {
+            await prisma.user.update({
+              where: { id: token.sub },
+              data: { name: token.name }
+            });
+          } catch (error) {
+            console.error('Failed to update user name:', error);
+            // Don't break the auth flow even if DB update fails
+          }
         }
       }
-      // Update database to reflect the token name
-      // Temporarily commented out due to DB connection issues
-      // await prisma.user.update({
-      //   where: { id: token.sub },
-      //   data: { name: token.name }
-      // });
+
+      if ((trigger === 'signIn' || trigger === 'signUp') && user) {
+        try {
+          const cookiesObject = await cookies();
+          const sessionCartId = cookiesObject.get('sessionCartId')?.value;
+          
+          console.log('Cart migration: sessionCartId =', sessionCartId);
+          console.log('Cart migration: user.id =', user.id);
+          
+          if (sessionCartId && user.id) {
+            const sessionCart = await prisma.cart.findFirst({
+              where: { sessionCartId }
+            });
+            
+            console.log('Cart migration: found sessionCart =', !!sessionCart);
+            
+            if (sessionCart) {
+              // Delete current user cart if exists
+              await prisma.cart.deleteMany({
+                where: { userId: user.id },
+              });
+              
+              // Assign session cart to user
+              await prisma.cart.update({
+                where: { id: sessionCart.id },
+                data: { userId: user.id },
+              });
+              
+              // Revalidate cart page to show updated data
+              revalidatePath('/cart');
+              
+              console.log('Cart migration: successfully migrated cart');
+            }
+          }
+        } catch (error) {
+          console.error('Failed to handle cart during sign in:', error);
+          // Don't break the auth flow even if cart handling fails
+        }
+      }
+
+      // Handle session updates
+      if (session?.user.name && trigger === 'update') {
+        token.name = session.user.name;
+      }
+      
       return token;
     },
   },
