@@ -7,17 +7,14 @@ import { BadgeDollarSign, CreditCard, Users, Barcode } from 'lucide-react';
 import Link from 'next/link';
 import { formatCurrency, formatNumber, formatDateTime } from '@/lib/utils';
 import Charts from './charts';
+import { requireAdmin } from '@/lib/auth-guard';
 
 export const metadata: Metadata = {
   title: 'Admin Dashboard',
 };
 
 const AdminOverviewPage = async () => {
-  const session = await auth();
-
-  if (session?.user?.role !== 'admin') {
-    throw new Error('User is not authorized')
-  }
+  await requireAdmin();
 
   const summary = await getOrderSummary();
 
