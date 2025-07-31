@@ -241,7 +241,7 @@ async function updateOrderToPaid({
   });
 
   if (!updatedOrder) throw new Error('Order not found');
-}
+} 
 
 // Get user's orders
 export async function getMyOrders({
@@ -314,7 +314,7 @@ export async function getOrderSummary() {
     latestSales,
     salesData,
   };
-}
+} 
 
 // Get all orders
 export async function getAllOrders({
