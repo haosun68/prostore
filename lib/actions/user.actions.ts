@@ -1,11 +1,12 @@
 'use server';
 
-import { signInFormSchema, signUpFormSchema, shippingAddressSchema, paymentMethodSchema } from "../validators";
+import { signInFormSchema, signUpFormSchema, shippingAddressSchema, paymentMethodSchema, updateUserSchema } from "../validators";
 import { signIn, signOut, auth } from "@/auth";
 import { ShippingAddress } from "@/types";
 import { z } from 'zod';
 import { hashSync } from "bcrypt-ts-edge";
 import { prisma } from "@/db/prisma";
+import { Prisma } from "@prisma/client";
 import { formatError } from "@/lib/utils";
 import { PAGE_SIZE } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
@@ -158,17 +159,32 @@ export async function updateProfile(user: { name: string; email: string; }) {
 export async function getAllUsers({
   limit = PAGE_SIZE,
   page,
+  query,
 }: {
   limit?: number;
   page: number;
+  query: string;
 }) {
+  const queryFilter: Prisma.UserWhereInput =
+    query && query !== 'all'
+      ? {
+          name: {
+            contains: query,
+            mode: 'insensitive',
+          } as Prisma.StringFilter,
+        }
+      : {};
+
   const data = await prisma.user.findMany({
+    where: {
+      ...queryFilter,
+    },
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: (page - 1) * limit,
   });
 
-  const dataCount = await prisma.user.count();
+  const dataCount = await prisma.user.count({ where: queryFilter });
 
   return {
     data,
@@ -193,3 +209,25 @@ export async function deleteUser(id: string) {
     return { success: false, message: formatError(error) };
   }
 } 
+
+// Update a user
+export async function updateUser(user: z.infer<typeof updateUserSchema>) {
+  try {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: {
+        name: user.name,
+        role: user.role,
+      }
+    });
+
+    revalidatePath('/admin/users');
+
+    return {
+      success: true,
+      message: 'User updated successfully',
+    };
+  } catch (error) {
+    return { success: false, message: formatError(error) };
+  }
+}
