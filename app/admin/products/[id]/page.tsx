@@ -2,7 +2,8 @@ import { getProductById } from '@/lib/actions/product.actions';
 import ProductForm from '@/components/admin/product-form';
 import { notFound } from 'next/navigation';
 
-const AdminProductUpdatePage = async ({ params: { id } }: { params: { id: string } }) => {
+const AdminProductUpdatePage = async ({ params }: { params: Promise<{ id: string }> }) => {
+  const { id } = await params;
   const product = await getProductById(id);
 
   if (!product) {

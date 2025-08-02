@@ -101,7 +101,7 @@ export async function updateUserAddress(data: ShippingAddress) {
       message: 'User updated successfully',
     };
   } catch (error) {
-    return { success: false, message: formatError(error) }
+    return { success: false, message: await formatError(error) }
   }
 }
 
@@ -126,7 +126,7 @@ export async function updateUserPaymentMethod(data: z.infer<typeof paymentMethod
       success: true, message: 'User updated successfully'
     };
   } catch (error) {
-    return { success: false, message: formatError(error) }
+    return { success: false, message: await formatError(error) }
   }
 }
 
@@ -151,7 +151,7 @@ export async function updateProfile(user: { name: string; email: string; }) {
     };
 
   } catch (error) {
-    return {success: false, message: formatError(error)}
+    return {success: false, message: await formatError(error)}
   }
 }
 
@@ -206,7 +206,7 @@ export async function deleteUser(id: string) {
       message: 'User deleted successfully',
     };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 } 
 
@@ -228,6 +228,6 @@ export async function updateUser(user: z.infer<typeof updateUserSchema>) {
       message: 'User updated successfully',
     };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }

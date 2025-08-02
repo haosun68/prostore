@@ -27,10 +27,10 @@ const ProductForm = ({ type, product, productId }: {
   const router = useRouter();
   const { toast } = useToast();
 
-  const form = useForm<z.infer<typeof insertProductSchema>>({
+  const form = useForm<z.infer<typeof updateProductSchema>>({
     resolver: type === 'Update' ? zodResolver(updateProductSchema) : zodResolver(insertProductSchema),
     defaultValues: product && type === 'Update' ? product : productDefaultValues,
-  });
+  } as any);
 
   const onSubmit: SubmitHandler<z.infer<typeof insertProductSchema>> = async (values) => {
     if (type === 'Create') {
@@ -192,7 +192,7 @@ const ProductForm = ({ type, product, productId }: {
           <FormField
             control={form.control}
             name='images'
-            render={({ field }) => (
+            render={() => (
               <FormItem className='w-full'>
                 <FormLabel>Images</FormLabel>
                 <Card>

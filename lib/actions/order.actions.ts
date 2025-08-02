@@ -1,13 +1,11 @@
 'use server';
 
-type SalesDataType = Array<{ month: string; totalSales: number }>;
-
 import { auth } from "@/auth";
 import { getMyCart } from "./cart.actions";
 import { getUserById } from "./user.actions";
 import { CartItem } from "@/types";
 import { prisma } from "@/db/prisma";
-import { insertOrderSchema } from "../validators";
+
 import { convertToPlainObject, formatError } from "../utils";
 import { paypal } from "../paypal";
 import { revalidatePath } from "next/cache";
@@ -27,6 +25,8 @@ export async function createOrder() {
     if (!userId) throw new Error('User not found');
 
     const user = await getUserById(userId);
+
+    if (!user) throw new Error('User not found');
 
     if (!cart || cart.items.length === 0) {
       return { success: false, message: 'Your cart is empty', redirectTo: '/cart' }
@@ -92,7 +92,7 @@ export async function createOrder() {
     if (error instanceof Error && error.message.includes('NEXT_REDIRECT')) {
       throw error;
     }
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -145,7 +145,7 @@ export async function createPayPalOrder(orderId: string) {
       throw new Error('Order not found');
     }
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -187,7 +187,7 @@ export async function approvePayPalOrder(
       message: 'Your order has been paid',
     };
   } catch (error) {
-    return {success: false, message: formatError(error)}
+    return {success: false, message: await formatError(error)}
   }
 }
 
@@ -255,14 +255,14 @@ export async function getMyOrders({
   if (!session) throw new Error('User is not authorized');
 
   const data = await prisma.order.findMany({
-    where: { userId: session?.user?.id! },
+    where: { userId: session?.user?.id },
     orderBy: { createdAt: 'desc' },
     take: limit,
     skip: (page - 1) * limit,
   });
 
   const dataCount = await prisma.order.count({
-    where: { userId: session?.user?.id! },
+    where: { userId: session?.user?.id },
   });
 
   return {
@@ -270,11 +270,6 @@ export async function getMyOrders({
     totalPages: Math.ceil(dataCount / limit),
   };
 }
-
-type SalesDataType = {
-  month: string;
-  totalSales: number;
-}[];
 
 // Get order summary for admin dashboard
 export async function getOrderSummary() {
@@ -294,7 +289,7 @@ export async function getOrderSummary() {
   >`SELECT to_char("createdAt", 'MM/YY') as "month", sum("totalPrice") as "totalSales" FROM
 "Order" GROUP BY to_char("createdAt", 'MM/YY')`;
 
-  const salesData: SalesDataType = salesDataRaw.map((entry) => ({
+  const salesData: Array<{ month: string; totalSales: number }> = salesDataRaw.map((entry) => ({
     month: entry.month,
     totalSales: Number(entry.totalSales),
   }));
@@ -364,7 +359,7 @@ export async function deleteOrder(id: string) {
   } catch (error) {
     return {
       success: false,
-      message: formatError(error),
+      message: await formatError(error),
     };
   }
 }
@@ -378,7 +373,7 @@ export async function updateOrderToPaidCOD(orderId: string) {
 
     return { success: true, message: 'Order marked as paid' };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -406,6 +401,6 @@ export async function deliverOrder(orderId: string) {
 
     return { success: true, message: 'Order has been marked delivered' };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 } 

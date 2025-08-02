@@ -5,6 +5,7 @@ import { convertToPlainObject, formatError } from '../utils';
 import { LATEST_PRODUCTS_LIMIT, PAGE_SIZE } from '../constants';
 import { revalidatePath } from 'next/cache';
 import { insertProductSchema, updateProductSchema } from '../validators';
+import { Prisma } from '@prisma/client';
 
 // Get latest products
 export async function getLatestProducts() {
@@ -38,33 +39,73 @@ export async function getAllProducts({
   limit = PAGE_SIZE,
   page,
   category,
+  price,
+  rating,
+  sort,
 }: {
   query: string;
   limit?: number;
   page: number;
   category?: string;
+  price?: string;
+  rating?: string;
+  sort?: string;
 }) {
-  const where: any = {};
+  // Query filter
+  const queryFilter: Prisma.ProductWhereInput =
+    query && query !== 'all' ? {
+      name: {
+        contains: query,
+        mode: 'insensitive'
+      } as Prisma.StringFilter
+    } : {};
 
-  if (query) {
-    where.OR = [
-      { name: { contains: query, mode: 'insensitive' } },
-      { description: { contains: query, mode: 'insensitive' } },
-    ];
-  }
+  // Category filter
+  const categoryFilter = category && category !== 'all' ? { category } : {};
 
-  if (category) {
-    where.category = category;
-  }
+  // Price filter
+  const priceFilter: Prisma.ProductWhereInput =
+    price && price !== 'all'
+      ? {
+          price: {
+            gte: Number(price.split('-')[0]),
+            lte: Number(price.split('-')[1]),
+          },
+        }
+      : {};
+
+  // Rating filter
+  const ratingFilter: Prisma.ProductWhereInput =
+    rating && rating !== 'all'
+      ? {
+          rating: {
+            equals: parseFloat(rating),
+          },
+        }
+      : {};
+
+
 
   const data = await prisma.product.findMany({
-    where,
     orderBy: { createdAt: 'desc' },
+    where: {
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...ratingFilter,
+    },
     skip: (page - 1) * limit,
     take: limit,
   });
 
-  const dataCount = await prisma.product.count({ where });
+  const dataCount = await prisma.product.count({
+    where: {
+      ...queryFilter,
+      ...categoryFilter,
+      ...priceFilter,
+      ...ratingFilter,
+    },
+  });
 
   return {
     data,
@@ -86,7 +127,7 @@ export async function deleteProduct(id: string) {
 
     return { success: true, message: 'Product deleted successfully', };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -102,7 +143,7 @@ export async function createProduct(data: z.infer<typeof insertProductSchema>) {
       message: 'Product created successfully',
     };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
 }
 
@@ -128,6 +169,27 @@ export async function updateProduct(data: z.infer<typeof updateProductSchema>) {
       message: 'Product updated successfully',
     };
   } catch (error) {
-    return { success: false, message: formatError(error) };
+    return { success: false, message: await formatError(error) };
   }
+}
+
+// Get all categories
+export async function getAllCategories() {
+  const data = await prisma.product.groupBy({
+    by: ['category'],
+    _count: true,
+  });
+
+  return data;
+}
+
+// Get featured products
+export async function getFeaturedProducts() {
+  const data = await prisma.product.findMany({
+    where: { isFeatured: true },
+    orderBy: { createdAt: 'desc' },
+    take: 4,
+  });
+
+  return convertToPlainObject(data);
 }

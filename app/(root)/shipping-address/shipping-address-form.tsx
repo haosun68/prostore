@@ -12,7 +12,6 @@ import { shippingAddressDefaultValues } from '@/lib/constants';
 import { 
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,

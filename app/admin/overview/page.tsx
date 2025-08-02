@@ -1,4 +1,4 @@
-import { auth } from '@/auth';
+
 import { Metadata } from 'next';
 import { getOrderSummary } from '@/lib/actions/order.actions';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
