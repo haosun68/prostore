@@ -12,15 +12,18 @@ import { useToast } from '@/hooks/use-toast';
 import { useTransition } from 'react';
 import { PayPalButtons, PayPalScriptProvider, usePayPalScriptReducer, } from '@paypal/react-paypal-js';
 import { createPayPalOrder, approvePayPalOrder, updateOrderToPaidCOD, deliverOrder, } from '@/lib/actions/order.actions';
+import StripePayment from './stripe-payment';
 
 const OrderDetailsTable = ({
   order,
   paypalClientId,
   isAdmin,
+  stripeClientSecret,
 }: {
   order: Order;
   paypalClientId: string;
   isAdmin: boolean;
+  stripeClientSecret: string | null;
 }) => {
   const {
     shippingAddress,
@@ -227,6 +230,15 @@ const OrderDetailsTable = ({
                     />
                   </PayPalScriptProvider>
                 </div>
+              )}
+
+              {/* Stripe Payment */}
+              {!isPaid && paymentMethod === 'Stripe' && stripeClientSecret && (
+                <StripePayment
+                  priceInCents={Number(order.totalPrice) * 100}
+                  orderId={order.id}
+                  clientSecret={stripeClientSecret}
+                />
               )}
 
               {/* Cash On Delivery */}
