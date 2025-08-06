@@ -20,7 +20,7 @@ const OrderDetailsTable = ({
   isAdmin,
   stripeClientSecret,
 }: {
-  order: Order;
+  order: Omit<Order, 'paymentResult'>;
   paypalClientId: string;
   isAdmin: boolean;
   stripeClientSecret: string | null;
@@ -222,13 +222,19 @@ const OrderDetailsTable = ({
               {/* PayPal Payment */}
               {!isPaid && paymentMethod === 'PayPal' && (
                 <div className='mt-4'>
-                  <PayPalScriptProvider options={{ clientId: paypalClientId }}>
-                    <PrintLoadingState />
-                    <PayPalButtons
-                      createOrder={handleCreatePayPalOrder}
-                      onApprove={handleApprovePayPalOrder}
-                    />
-                  </PayPalScriptProvider>
+                  {paypalClientId ? (
+                    <PayPalScriptProvider options={{ clientId: paypalClientId }}>
+                      <PrintLoadingState />
+                      <PayPalButtons
+                        createOrder={handleCreatePayPalOrder}
+                        onApprove={handleApprovePayPalOrder}
+                      />
+                    </PayPalScriptProvider>
+                  ) : (
+                    <div className="text-red-500 text-sm">
+                      PayPal configuration is missing. Please check your environment variables.
+                    </div>
+                  )}
                 </div>
               )}
 
