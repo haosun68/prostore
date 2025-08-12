@@ -41,7 +41,6 @@ const OrderDetailsPage = async (props: {
     <OrderDetailsTable
       order={{
         ...order,
-        orderItems: order.orderitems || [],
         shippingAddress: order.shippingAddress as ShippingAddress,
       }}
       stripeClientSecret={client_secret}

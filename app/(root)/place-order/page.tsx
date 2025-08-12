@@ -30,6 +30,10 @@ const PlaceOrderPage = async () => {
     redirect('/cart');
   }
 
+  if (!user) {
+    throw new Error('User not found');
+  }
+
   if (!user.address) redirect('/shipping-address');
   if (!user.paymentMethod) redirect('/payment-method');
 
