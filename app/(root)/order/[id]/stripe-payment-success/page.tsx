@@ -4,14 +4,21 @@ import Stripe from "stripe";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-
 const SuccessPage = async (props: {
   params: Promise<{ id: string; }>;
   searchParams: Promise<{ payment_intent: string; }>;
 }) => {
   const { id } = await props.params;
   const { payment_intent:paymentIntentId } = await props.searchParams;
+
+  // Check if Stripe secret key is available
+  if (!process.env.STRIPE_SECRET_KEY) {
+    console.warn('STRIPE_SECRET_KEY is not set');
+    return notFound();
+  }
+
+  // Initialize Stripe client
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
   // Fetch order
   const order = await getOrderById(id);

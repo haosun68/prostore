@@ -26,15 +26,20 @@ const OrderDetailsPage = async (props: {
 
   // Check if is not paid and using stripe
   if (order.paymentMethod === 'Stripe' && !order.isPaid) {
-    // Init stripe instance
-    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
-    // Create payment intent
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: Math.round(Number(order.totalPrice) * 100),
-      currency: 'USD',
-      metadata: { orderId: order.id }
-    });
-    client_secret = paymentIntent.client_secret;
+    // Check if Stripe secret key is available
+    if (!process.env.STRIPE_SECRET_KEY) {
+      console.warn('STRIPE_SECRET_KEY is not set, skipping Stripe payment intent creation');
+    } else {
+      // Init stripe instance
+      const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+      // Create payment intent
+      const paymentIntent = await stripe.paymentIntents.create({
+        amount: Math.round(Number(order.totalPrice) * 100),
+        currency: 'USD',
+        metadata: { orderId: order.id }
+      });
+      client_secret = paymentIntent.client_secret;
+    }
   }
 
   return (
