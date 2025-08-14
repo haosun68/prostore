@@ -9,6 +9,7 @@ import { revalidatePath } from 'next/cache';
 
 
 export const config: NextAuthConfig = {
+  secret: process.env.NEXTAUTH_SECRET,
   pages: {
     signIn: '/sign-in',
     signOut: '/',
