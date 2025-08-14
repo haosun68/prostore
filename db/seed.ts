@@ -10,7 +10,11 @@ async function main() {
   await prisma.user.deleteMany();
 
   await prisma.product.createMany({ data: sampleData.products });
-  await prisma.user.createMany({ data: sampleData.users });
+  
+  // Only create users if sampleData.users is not empty
+  if (sampleData.users.length > 0) {
+    await prisma.user.createMany({ data: sampleData.users });
+  }
 
   console.log('Database seeded successfully!');
 }

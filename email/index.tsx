@@ -7,7 +7,7 @@ dotenv.config();
 import PurchaseReceiptEmail from './purchase-receipt';
 
 export const sendPurchaseReceipt = async ({ order }: { order: Order }) => {
-  // 只在需要时才初始化 Resend 客户端
+  // Initialize Resend client only when needed
   if (!process.env.RESEND_API_KEY) {
     console.warn('RESEND_API_KEY is not set, skipping email sending');
     return;
