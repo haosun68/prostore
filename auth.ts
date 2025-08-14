@@ -11,6 +11,7 @@ import { revalidatePath } from 'next/cache';
 export const config: NextAuthConfig = {
   pages: {
     signIn: '/sign-in',
+    signOut: '/',
     error: '/sign-in',
   },
   session: {

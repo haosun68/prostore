@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import { auth } from '@/auth';
-import { signOutUser } from '@/lib/actions/user.actions';
 import { Button } from '@/components/ui/button';
 import { UserIcon } from 'lucide-react';
+import SignOutButton from './sign-out-button';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -72,14 +72,7 @@ const UserButton = async () => {
           )}
 
           <DropdownMenuItem className='p-0 mb-1'>
-            <form action={signOutUser} className='w-full'>
-              <Button
-                className='w-full py-4 px-2 h-4 justify-start'
-                variant='ghost'
-              >
-                Sign Out
-              </Button>
-            </form>
+            <SignOutButton />
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
