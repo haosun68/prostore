@@ -1,26 +1,26 @@
-# Vercel 部署指南
+# Vercel Deployment Guide
 
-## 🔧 必需的环境变量
+## 🔧 Required Environment Variables
 
-在Vercel中部署此项目时，请确保设置以下环境变量：
+When deploying this project to Vercel, make sure to set the following environment variables:
 
-### 1. NextAuth 配置 (必需)
+### 1. NextAuth Configuration (Required)
 ```
 NEXTAUTH_SECRET=your-secret-key-here
 NEXTAUTH_URL=https://your-vercel-app-url.vercel.app
 ```
 
-**如何生成 NEXTAUTH_SECRET:**
+**How to generate NEXTAUTH_SECRET:**
 ```bash
 openssl rand -base64 32
 ```
 
-### 2. 数据库 (必需)
+### 2. Database (Required)
 ```
 DATABASE_URL=your-database-connection-string
 ```
 
-### 3. 支付服务 (可选)
+### 3. Payment Services (Optional)
 ```
 STRIPE_SECRET_KEY=sk_test_...
 STRIPE_PUBLISHABLE_KEY=pk_test_...
@@ -28,34 +28,34 @@ STRIPE_WEBHOOK_SECRET=whsec_...
 PAYPAL_CLIENT_ID=your-paypal-client-id
 ```
 
-### 4. 邮件服务 (可选)
+### 4. Email Service (Optional)
 ```
 RESEND_API_KEY=re_...
 SENDER_EMAIL=noreply@yourdomain.com
 ```
 
-### 5. 文件上传 (可选)
+### 5. File Upload (Optional)
 ```
 UPLOADTHING_SECRET=sk_live_...
 UPLOADTHING_APP_ID=your-app-id
 ```
 
-## 🚀 在Vercel中设置环境变量
+## 🚀 Setting Environment Variables in Vercel
 
-1. 登录到 [Vercel Dashboard](https://vercel.com/dashboard)
-2. 选择你的项目
-3. 转到 **Settings** > **Environment Variables**
-4. 添加上述环境变量
-5. 重新部署项目
+1. Log in to [Vercel Dashboard](https://vercel.com/dashboard)
+2. Select your project
+3. Go to **Settings** > **Environment Variables**
+4. Add the environment variables above
+5. Redeploy the project
 
-## ⚠️ 常见问题
+## ⚠️ Common Issues
 
-### Sign Out 不工作
-如果登出功能不工作，请确保：
-- `NEXTAUTH_SECRET` 已设置
-- `NEXTAUTH_URL` 设置为正确的生产URL
-- 重新部署项目以应用环境变量
+### Sign Out Not Working
+If the logout functionality is not working, make sure:
+- `NEXTAUTH_SECRET` is set
+- `NEXTAUTH_URL` is set to the correct production URL
+- Redeploy the project to apply environment variables
 
-### 数据库连接问题
-- 确保 `DATABASE_URL` 格式正确
-- 检查数据库提供商的IP白名单设置
+### Database Connection Issues
+- Ensure `DATABASE_URL` format is correct
+- Check your database provider's IP whitelist settings
